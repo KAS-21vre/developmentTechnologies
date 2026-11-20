@@ -1,0 +1,22 @@
+flowchart TB
+ user["Участник"]
+ mod["Модератор"]
+ subgraph sys["SkillSwap — модульный монолит"]
+  browser["Браузерный клиент<br/><i>контейнер: HTML5, CSS3, JavaScript ES2022</i><br/>Интерфейс участника и модератора<br/><b>ЛР 8</b>"]
+  static["Сервер статических файлов<br/><i>контейнер: Nginx 1.26</i><br/>Раздаёт HTML, CSS и JavaScript<br/><b>ЛР 3А</b>"]
+  api["REST API<br/><i>контейнер: ASP.NET Core 8 / C# 12</i><br/>Identity, Catalog, Exchange,<br/>Reputation, Moderation<br/><b>ЛР 3Б</b>"]
+  db[("База данных<br/><i>контейнер: PostgreSQL 16</i><br/>Пользователи, навыки, публикации,<br/>обмены, занятия, отзывы, жалобы<br/><b>ЛР 4А</b>")]
+ end
+ mail["Почтовый провайдер<br/>внешняя система; следующий релиз"]
+ video["Внешняя видеосвязь<br/>не управляется SkillSwap"]
+ ci["GitHub Actions<br/>внешняя система разработки"]
+ monitor["Проверка доступности<br/>HTTP GET /health"]
+ user -->|"HTTPS"| browser
+ mod -->|"HTTPS"| browser
+ browser -->|"HTTPS: загрузка интерфейса"| static
+ browser -->|"JSON REST поверх HTTPS"| api
+ api -->|"SQL/TCP: чтение и запись транзакциями"| db
+ api -.->|"уведомления; не MVP"| mail
+ user -.->|"самостоятельная договорённость"| video
+ ci -->|"проверяет репозиторий"| api
+ monitor -->|"опрашивает /health"| api

@@ -1,0 +1,44 @@
+sequenceDiagram
+ actor A as Участник A
+ participant W as Веб-клиент
+ participant API as REST API
+ participant DB as PostgreSQL
+ actor B as Участник B
+ A->>W: Выбирает активную публикацию
+ W->>API: POST /v1/exchanges
+ API->>DB: Проверить публикацию и участников
+ alt Публикация активна, участники разные
+  API->>DB: Создать Exchange PENDING
+  DB-->>API: Создано
+  API-->>W: 201 Created
+  B->>W: Открывает входящее предложение
+  W->>API: POST /v1/exchanges/{id}/decision
+  API->>DB: Проверить право и статус
+  alt Принимает
+   API->>DB: Сохранить ACCEPTED
+   API-->>W: 200 OK
+  else Отклоняет
+   API->>DB: Сохранить REJECTED
+   API-->>W: 200 OK
+  else Устаревший статус
+   API-->>W: 409 Conflict
+  end
+ else Публикация закрыта или A = B
+  API-->>W: 400/409 — действие невозможно
+ end
+ opt Условия приняты
+  A->>W: Согласует дату, время, формат
+  W->>API: PUT /v1/exchanges/{id}/session
+  API->>DB: Сохранить согласование обеих сторон
+  API-->>W: 200; SCHEDULED
+  Note over A,B: Запланированное занятие ещё не завершает обмен
+  A->>W: Подтверждает проведение
+  W->>API: POST /v1/exchanges/{id}/confirm-completion
+  API->>DB: Сохранить подтверждение A
+  API-->>W: AWAITING_CONFIRMATION
+  B->>W: Подтверждает проведение
+  W->>API: POST /v1/exchanges/{id}/confirm-completion
+  API->>DB: Сохранить B; проверить два подтверждения
+  DB-->>API: COMPLETED
+  API-->>W: 200; COMPLETED
+ end

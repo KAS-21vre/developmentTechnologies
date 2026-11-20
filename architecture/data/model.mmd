@@ -1,0 +1,99 @@
+erDiagram
+ USERS {
+  uuid id PK
+  varchar email UK
+  varchar password_hash
+  varchar display_name
+  varchar account_role
+  timestamptz created_at
+  timestamptz updated_at
+ }
+ SKILLS {
+  uuid id PK
+  varchar name UK
+  text description
+  timestamptz created_at
+ }
+ USER_SKILLS {
+  uuid user_id PK, FK
+  uuid skill_id PK, FK
+  varchar skill_kind PK
+  varchar proficiency_level
+  timestamptz created_at
+ }
+ LISTINGS {
+  uuid id PK
+  uuid owner_id FK
+  uuid skill_id FK
+  varchar listing_type
+  text description
+  varchar status
+  timestamptz created_at
+  timestamptz updated_at
+ }
+ EXCHANGES {
+  uuid id PK
+  uuid listing_id FK
+  uuid initiator_id FK
+  uuid recipient_id FK
+  uuid offered_skill_id FK
+  uuid requested_skill_id FK
+  varchar status
+  int terms_version
+  timestamptz created_at
+  timestamptz updated_at
+ }
+ SESSIONS {
+  uuid id PK
+  uuid exchange_id FK, UK
+  timestamptz starts_at
+  varchar format
+  text meeting_details
+  varchar status
+  timestamptz created_at
+ }
+ EXCHANGE_CONFIRMATIONS {
+  uuid id PK
+  uuid exchange_id FK
+  uuid user_id FK
+  int terms_version
+  timestamptz confirmed_at
+ }
+ REVIEWS {
+  uuid id PK
+  uuid exchange_id FK
+  uuid author_id FK
+  uuid recipient_id FK
+  int rating
+  varchar comment
+  timestamptz created_at
+ }
+ REPORTS {
+  uuid id PK
+  uuid author_id FK
+  uuid target_user_id FK
+  uuid listing_id FK
+  varchar reason
+  text description
+  varchar status
+  uuid moderator_id FK
+  text moderator_comment
+  timestamptz created_at
+  timestamptz resolved_at
+ }
+ USERS ||--o{ USER_SKILLS : has
+ SKILLS ||--o{ USER_SKILLS : assigned
+ USERS ||--o{ LISTINGS : owns
+ SKILLS ||--o{ LISTINGS : describes
+ LISTINGS ||--o{ EXCHANGES : starts
+ USERS ||--o{ EXCHANGES : initiates
+ USERS ||--o{ EXCHANGES : receives
+ SKILLS ||--o{ EXCHANGES : offered
+ SKILLS ||--o{ EXCHANGES : requested
+ EXCHANGES ||--o| SESSIONS : schedules
+ EXCHANGES ||--o{ EXCHANGE_CONFIRMATIONS : confirmed_by
+ USERS ||--o{ EXCHANGE_CONFIRMATIONS : confirms
+ EXCHANGES ||--o{ REVIEWS : receives
+ USERS ||--o{ REVIEWS : writes
+ USERS ||--o{ REPORTS : submits
+ USERS o|--o{ REPORTS : moderates

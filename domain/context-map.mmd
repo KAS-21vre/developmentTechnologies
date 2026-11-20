@@ -1,0 +1,18 @@
+flowchart LR
+ subgraph core["SkillSwap"]
+  identity["Профиль и навыки<br/>Identity"]
+  catalog["Каталог предложений<br/>Catalog"]
+  exchange["Обмен и занятия<br/>Exchange"]
+  reputation["Отзывы и рейтинг<br/>Reputation"]
+  moderation["Жалобы<br/>Moderation"]
+ end
+ email["Почтовый провайдер<br/>внешняя система, позже"]
+ video["Внешняя видеосвязь<br/>вне управления SkillSwap"]
+ identity -->|"ID участника, публичный профиль"| catalog
+ identity -->|"участники и права"| exchange
+ catalog -->|"публикация и автор"| exchange
+ exchange -->|"факт завершённого обмена"| reputation
+ identity -->|"автор жалобы и права"| moderation
+ reputation -->|"жалоба на отзыв"| moderation
+ exchange -.->|"события уведомлений, позже"| email
+ exchange -.->|"участники договариваются сами"| video
